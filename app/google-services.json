@@ -1,0 +1,52 @@
+{
+  "project_info": {
+    "project_number": "815763108077",
+    "project_id": "node-auth-153813"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:815763108077:android:b987ae0cf94f67ea",
+        "android_client_info": {
+          "package_name": "ua.pp.rudiki"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "815763108077-kq5vm1om5k3ssabudm0aj9cuku98abgi.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "ua.pp.rudiki",
+            "certificate_hash": "E858B2051803188A9756F50773EE2A9A617F79B4"
+          }
+        },
+        {
+          "client_id": "815763108077-vjc80htfusjnjtk8kkp3l72hhv8hm45o.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "815763108077-nb9vs1kk1d7g7k153496c6bajj32nq27.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD8QD2hdojKl-XjSZlCnwaIc1ShQUI9or8"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

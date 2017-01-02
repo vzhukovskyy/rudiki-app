@@ -1,0 +1,53 @@
+package ua.pp.rudiki;
+
+import android.content.Context;
+import android.location.Location;
+import android.os.Environment;
+import android.util.Log;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+public class GpsLog {
+    private static final String TAG = GpsLog.class.getSimpleName();
+    private File file;
+
+    public GpsLog(Context context) {
+        String root = Environment.getExternalStorageDirectory().toString();
+        file = new File(root, "rudiki-gps-log.txt");
+
+        Log.e(TAG, "Saving GPS data to file "+file.getAbsolutePath());
+        log("Gps log started");
+    }
+
+    public void log(Location location) {
+        String message = location.getLatitude() + " " + location.getLongitude();
+        log(message);
+    }
+
+    public void log(String message) {
+        FileOutputStream stream = null;
+        try {
+            stream = new FileOutputStream(file, true);
+
+            Date now = new Date();
+            SimpleDateFormat dt = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
+            String s = dt.format(now) + " " + message + "\n";
+
+            stream.write(s.getBytes());
+        }
+        catch(Throwable t) {
+            t.printStackTrace();
+        }
+        finally {
+            try {
+                stream.close();
+            }
+            catch(Throwable t) {
+                t.printStackTrace();
+            }
+        }
+    }
+}
