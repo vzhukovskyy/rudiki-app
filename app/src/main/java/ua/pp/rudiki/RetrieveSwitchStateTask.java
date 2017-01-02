@@ -2,7 +2,6 @@ package ua.pp.rudiki;
 
 import android.os.AsyncTask;
 import android.util.Log;
-import android.view.View;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -12,9 +11,9 @@ import java.net.URL;
 class RetrieveSwitchStateTask extends AsyncTask<Void, Void, String> {
     private static final String TAG = RetrieveSwitchStateTask.class.getSimpleName();
 
-    private AsyncTaskListener listener;
+    private SwitchStateListener listener;
 
-    RetrieveSwitchStateTask(AsyncTaskListener listener) {
+    RetrieveSwitchStateTask(SwitchStateListener listener) {
         this.listener = listener;
     }
 

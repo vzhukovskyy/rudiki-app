@@ -1,7 +1,6 @@
 package ua.pp.rudiki;
 
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -28,9 +27,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import ua.pp.rudiki.R;
-
-public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, AsyncTaskListener {
+public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, SwitchStateListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
@@ -63,53 +60,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         startService(new Intent(this, RudikiGpsService.class));
     }
 
-    void signIn() {
-
-        // Configure sign-in to request the user's ID, email address, and basic
-        // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestEmail()
-                .build();
-
-        // Build a GoogleApiClient with access to the Google Sign-In API and the
-        // options specified by gso.
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
-                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
-                .build();
-
-
-        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
-        this.startActivityForResult(signInIntent, RC_SIGN_IN);
-    }
-
     @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        Log.e(TAG, "Connection failed");
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == RC_SIGN_IN) {
-            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
-            if (result.isSuccess()) {
-                googleAccount = result.getSignInAccount();
-                Log.e(TAG, "successfully signed in as "+googleAccount.getDisplayName());
-                onSignedIn();
-            } else {
-                Log.e(TAG, "sign-in failed");
-            }
-        }
-    }
-
-    protected void requestSwitchState() {
-        new RetrieveSwitchStateTask(this).execute();
-    }
-
-    @Override
-    public void onTaskCompleted(String response) {
+    public void onSwitchStateReceived(String response) {
         if(response != null) {
             try {
                 JSONObject json = (JSONObject) new JSONTokener(response).nextValue();
@@ -135,6 +87,52 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             catch (JSONException e) {
             }
         }
+    }
+
+    void signIn() {
+
+        // Configure sign-in to request the user's ID, email address, and basic
+        // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .build();
+
+        // Build a GoogleApiClient with access to the Google Sign-In API and the
+        // options specified by gso.
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
+                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                .build();
+
+
+        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+        this.startActivityForResult(signInIntent, RC_SIGN_IN);
+    }
+
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        Log.e(TAG, "Connection failed");
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == RC_SIGN_IN) {
+            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+            if (result.isSuccess()) {
+                googleAccount = result.getSignInAccount();
+                Log.e(TAG, "successfully signed in as "+googleAccount.getDisplayName());
+                onSignedIn();
+            } else {
+                Log.e(TAG, "sign-in failed");
+            }
+        }
+    }
+
+    protected void requestSwitchState() {
+        new RetrieveSwitchStateTask(this).execute();
     }
 
 

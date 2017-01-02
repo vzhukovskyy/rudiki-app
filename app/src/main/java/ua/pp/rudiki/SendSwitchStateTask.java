@@ -8,19 +8,17 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 
 class SendSwitchStateTask extends AsyncTask<Void, Void, String> {
     private static final String TAG = SendSwitchStateTask.class.getSimpleName();
 
-    private AsyncTaskListener listener;
+    private SwitchStateListener listener;
     private int index, state;
 
 
-    SendSwitchStateTask(int index, int state, AsyncTaskListener listener) {
+    SendSwitchStateTask(int index, int state, SwitchStateListener listener) {
         this.index = index;
         this.state = state;
         this.listener = listener;
