@@ -9,13 +9,17 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 
+import ua.pp.rudiki.geotrigger.A2BTrigger;
+import ua.pp.rudiki.geotrigger.AreaTrigger;
+import ua.pp.rudiki.geotrigger.GeoPoint;
+
 public class RudikiGpsService extends Service implements android.location.LocationListener
 {
     private static final String TAG = RudikiGpsService.class.getSimpleName();
 
     private LocationManager locationManager = null;
     private GpsLog gpsLog;
-    private LocationTrigger locationTrigger;
+    private A2BTrigger a2BTrigger;
 
     @Override
     public void onCreate() {
@@ -23,7 +27,11 @@ public class RudikiGpsService extends Service implements android.location.Locati
 
         gpsLog = new GpsLog(this);
         locationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
-        locationTrigger = new LocationTrigger();
+
+        GeoPoint pedestrianXingPoint = new GeoPoint(50.196465, 30.664731);
+        GeoPoint junctionPoint = new GeoPoint(50.195399, 30.665456);
+
+        a2BTrigger = new A2BTrigger(pedestrianXingPoint, junctionPoint);
 
         registerLocationManagerListener();
     }
@@ -49,8 +57,8 @@ public class RudikiGpsService extends Service implements android.location.Locati
 
         gpsLog.log(location);
 
-        locationTrigger.changeLocation(location.getLatitude(), location.getLongitude());
-        if(locationTrigger.isTriggered()) {
+        a2BTrigger.changeLocation(location.getLatitude(), location.getLongitude());
+        if(a2BTrigger.isTriggered()) {
             sendNotification();
         }
     }

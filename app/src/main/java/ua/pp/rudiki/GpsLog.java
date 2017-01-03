@@ -33,7 +33,7 @@ public class GpsLog {
             stream = new FileOutputStream(file, true);
 
             Date now = new Date();
-            SimpleDateFormat dt = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
+            SimpleDateFormat dt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
             String s = dt.format(now) + " " + message + "\n";
 
             stream.write(s.getBytes());
