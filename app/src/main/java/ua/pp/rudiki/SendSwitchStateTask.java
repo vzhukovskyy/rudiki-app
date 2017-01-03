@@ -15,16 +15,18 @@ class SendSwitchStateTask extends AsyncTask<Void, Void, String> {
     private static final String TAG = SendSwitchStateTask.class.getSimpleName();
 
     private SwitchStateListener listener;
+    private String token;
     private int index, state;
 
-
-    SendSwitchStateTask(int index, int state, SwitchStateListener listener) {
+    SendSwitchStateTask(int index, int state, String token, SwitchStateListener listener) {
         this.index = index;
         this.state = state;
         this.listener = listener;
+        this.token = token;
     }
 
     protected void onPreExecute() {
+        listener.onSwitchStateRequestIssued();
     }
 
     protected String doInBackground(Void... urls) {
@@ -32,7 +34,7 @@ class SendSwitchStateTask extends AsyncTask<Void, Void, String> {
         // Create data variable for sent values to server
 
         String text = "";
-        BufferedReader reader=null;
+        BufferedReader reader = null;
 
         // Send data
         try {
@@ -45,6 +47,7 @@ class SendSwitchStateTask extends AsyncTask<Void, Void, String> {
             connection.setDoOutput(true);
             connection.setRequestMethod("POST");
             connection.setRequestProperty("Content-Type","application/json");
+            connection.setRequestProperty("Authorization", "OAuth "+token);
             DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
 
             JSONObject jsonParam = new JSONObject();
@@ -85,6 +88,6 @@ class SendSwitchStateTask extends AsyncTask<Void, Void, String> {
 
     protected void onPostExecute(String response) {
         Log.i(TAG, "Response received: "+response);
-        listener.onTaskCompleted(response);
+        listener.onSwitchStateReceived(response);
     }
 }

@@ -1,6 +1,7 @@
 package ua.pp.rudiki;
 
 import android.content.Intent;
+import android.content.res.AssetManager;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -21,7 +22,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
+import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -30,6 +34,8 @@ import java.util.concurrent.TimeUnit;
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, SwitchStateListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
+
+    Properties properties = new Properties();
 
     private final int RC_SIGN_IN = 9001;
     GoogleApiClient mGoogleApiClient;
@@ -52,12 +58,25 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         switch1checkbox = (CheckBox)findViewById(R.id.switch1checkbox);
         switch2checkbox = (CheckBox)findViewById(R.id.switch2checkbox);
 
+        readProperties();
         signIn();
     }
 
     void onSignedIn() {
         requestSwitchState();
         startService(new Intent(this, RudikiGpsService.class));
+    }
+
+    @Override
+    public void onSwitchStateRequestIssued() {
+        cancelCountdownTimer();
+
+        switch1checkbox.setChecked(false);
+        switch2checkbox.setChecked(false);
+        switch1checkbox.setEnabled(false);
+        switch2checkbox.setEnabled(false);
+        switch1status.setText("Status unknown");
+        switch2status.setText("Status unknown");
     }
 
     @Override
@@ -95,6 +114,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
+                .requestIdToken(properties.getProperty("clientId"))
                 .build();
 
         // Build a GoogleApiClient with access to the Google Sign-In API and the
@@ -123,7 +143,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
             if (result.isSuccess()) {
                 googleAccount = result.getSignInAccount();
-                Log.e(TAG, "successfully signed in as "+googleAccount.getDisplayName());
+                Log.e(TAG, "successfully signed in as "+googleAccount.getDisplayName()+", token="+googleAccount.getIdToken());
                 onSignedIn();
             } else {
                 Log.e(TAG, "sign-in failed");
@@ -132,7 +152,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     }
 
     protected void requestSwitchState() {
-        new RetrieveSwitchStateTask(this).execute();
+        new RetrieveSwitchStateTask(googleAccount.getIdToken(), this).execute();
     }
 
 
@@ -163,8 +183,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
 
     private void scheduleCountDownTimer() {
-        if(scheduledFuture != null && !scheduledFuture.isCancelled())
-            scheduledFuture.cancel(false);
+        cancelCountdownTimer();
 
         Date now = new Date();
         if((switch1turnoffTime != null && switch1turnoffTime.after(now)) ||
@@ -205,6 +224,27 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         }
     }
 
+    private void cancelCountdownTimer() {
+        if(scheduledFuture != null && !scheduledFuture.isCancelled())
+            scheduledFuture.cancel(false);
+    }
+
+    private void readProperties() {
+        AssetManager assetManager = getAssets();
+        try {
+            // at first load demo properties, and then try to overwrite them with production properties
+            InputStream inputStream = assetManager.open("config-demo.properties");
+            properties.load(inputStream);
+            inputStream = assetManager.open("config-production.properties");
+            properties.load(inputStream);
+        } catch (IOException e) {
+            Log.e(TAG, e.toString());
+        }
+
+    }
+
+    // ******************** UI events ********************
+
     public void onRefreshBtnClick(View view) {
         requestSwitchState();
     }
@@ -215,7 +255,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         int index = (checkbox == switch1checkbox) ? 0 : 1;
         int state = checkbox.isChecked() ? 1 : 0;
 
-        new SendSwitchStateTask(index, state, this).execute();
+        new SendSwitchStateTask(index, state, googleAccount.getIdToken(), this).execute();
     }
 
 }
